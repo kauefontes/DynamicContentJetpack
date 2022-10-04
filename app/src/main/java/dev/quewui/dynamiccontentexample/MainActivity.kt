@@ -9,36 +9,46 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dev.quewui.dynamiccontentexample.ui.theme.DynamicContentExampleTheme
 
-val namesList: ArrayList<String> = arrayListOf("John", "Michael", "Andrew", "Danna", "Georgia")
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GreetingsList(names = namesList)
+            MainScreen()
         }
     }
 }
 
 @Composable
-fun GreetingsList(names: ArrayList<String>) {
+fun MainScreen(viewModel: MainViewModel = MainViewModel()) {
+    val newNameStateContent = viewModel.textViewState.observeAsState("")
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        for (name in names) {
-            Greeting(name = name)
-        }
-        Button(onClick = { namesList.add("Quewui") }) {
-            Text(text = "Add new Name")
-        }
+        horizontalAlignment = Alignment.CenterHorizontally,
+
+        ) {
+        GreetingMessage(
+            newNameStateContent.value
+        ) { newName -> viewModel.onTextChange(newName) }
+    }
+}
+
+@Composable
+fun GreetingMessage(
+    textFieldValue: String,
+    textFieldUpdate: (newName: String) -> Unit
+) {
+    TextField(value = textFieldValue, onValueChange = textFieldUpdate)
+    Button(onClick = {}) {
+        Text(text = textFieldValue)
     }
 }
 
@@ -46,7 +56,7 @@ fun GreetingsList(names: ArrayList<String>) {
 fun Greeting(name: String) {
     Text(
         text = "Hello $name!",
-        style = MaterialTheme.typography.h4,
+        style = MaterialTheme.typography.h5,
     )
 }
 
@@ -54,6 +64,6 @@ fun Greeting(name: String) {
 @Composable
 fun DefaultPreview() {
     DynamicContentExampleTheme {
-        GreetingsList(names = namesList)
+        MainScreen()
     }
 }
